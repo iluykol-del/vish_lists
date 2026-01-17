@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, Request, Form, HTTPException, Depends
+from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -39,10 +39,7 @@ async def root(request: Request):
     user = get_current_user(request)
     if not user:
         return RedirectResponse("/login")
-    return RedirectResponse("/wishlist")
-
-
-
+    return RedirectResponse("/calendar")
 
 
 # ── Аутентификация ───────────────────────────────────────────────────────
@@ -57,13 +54,13 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
         res = supabase.auth.sign_in_with_password({"email": email, "password": password})
         if not res.session:
             raise Exception("Не удалось войти")
-        response = RedirectResponse("/wishlist", status_code=303)
+        response = RedirectResponse("/calendar", status_code=303)
         response.set_cookie(
             key="access_token",
             value=res.session.access_token,
             httponly=True,
             max_age=res.session.expires_in,
-            secure=False,
+            secure=False,  # В продакшене → True
             samesite="lax"
         )
         return response
@@ -114,6 +111,7 @@ async def logout():
     return resp
 
 
+# ── Публичные списки ─────────────────────────────────────────────────────
 @app.get("/public", response_class=HTMLResponse)
 async def public_wishlists(request: Request):
     result = (
@@ -147,19 +145,28 @@ async def calendar_view(request: Request, month: int = None, year: int = None):
     start_date = date(target_year, target_month, 1)
     end_date = start_date + relativedelta(months=1) - relativedelta(days=1)
 
+    # Шаг 1: Получаем все праздники пользователя за месяц
     holidays_res = supabase.table("holidays")\
-        .select("*, holiday_wishlists!inner(wishlist_id, wishlists!inner(title))")\
+        .select("id, title, date, description")\
         .eq("user_id", user.id)\
         .gte("date", start_date.isoformat())\
         .lte("date", end_date.isoformat())\
         .order("date")\
         .execute()
 
+    # Шаг 2: Для каждого праздника отдельно получаем связанные вишлисты
     calendar_data = {}
     for h in holidays_res.data or []:
         d = h["date"]
         if d not in calendar_data:
             calendar_data[d] = []
+
+        links_res = supabase.table("holiday_wishlists")\
+            .select("wishlist_id, wishlists(title)")\
+            .eq("holiday_id", h["id"])\
+            .execute()
+
+        h["holiday_wishlists"] = links_res.data or []
         calendar_data[d].append(h)
 
     return templates.TemplateResponse("calendar.html", {
@@ -170,6 +177,31 @@ async def calendar_view(request: Request, month: int = None, year: int = None):
         "prev_month": (start_date - relativedelta(months=1)).strftime("%Y-%m"),
         "next_month": (start_date + relativedelta(months=1)).strftime("%Y-%m")
     })
+
+
+# ── API для событий календаря (для JS) ────────────────────────────────────
+@app.get("/calendar/events/{year}/{month}")
+async def get_calendar_events(year: int, month: int, request: Request):
+    user = get_current_user(request)
+    if not user:
+        return {}
+
+    start = date(year, month, 1)
+    end = start + relativedelta(months=1) - relativedelta(days=1)
+
+    res = supabase.table("holidays")\
+        .select("date, holiday_wishlists(count)")\
+        .eq("user_id", user.id)\
+        .gte("date", start.isoformat())\
+        .lte("date", end.isoformat())\
+        .execute()
+
+    counts = {}
+    for h in res.data or []:
+        day = h["date"].split('-')[2].lstrip('0')
+        counts[day] = h["holiday_wishlists"][0]["count"]
+
+    return counts
 
 
 @app.get("/calendar/add", response_class=HTMLResponse)
@@ -185,7 +217,8 @@ async def add_holiday_form(request: Request):
 
     return templates.TemplateResponse("add_holiday.html", {
         "request": request,
-        "wishlists": wishlists_res.data or []
+        "wishlists": wishlists_res.data or [],
+        "preselected_date": request.query_params.get("date")
     })
 
 
@@ -206,6 +239,7 @@ async def add_holiday(
     except:
         raise HTTPException(400, "Неверный формат даты (YYYY-MM-DD)")
 
+    # Создаём праздник
     holiday_res = supabase.table("holidays").insert({
         "user_id": user.id,
         "title": title.strip(),
@@ -216,11 +250,23 @@ async def add_holiday(
     holiday_id = holiday_res.data[0]["id"]
 
     if wishlist_ids:
+        # Проверяем, что все id реально принадлежат пользователю
+        valid_wishlists = supabase.table("wishlists")\
+            .select("id")\
+            .eq("user_id", user.id)\
+            .in_("id", wishlist_ids)\
+            .execute()
+
+        valid_ids = {w["id"] for w in valid_wishlists.data or []}
+
         for wid in wishlist_ids:
-            supabase.table("holiday_wishlists").insert({
-                "holiday_id": holiday_id,
-                "wishlist_id": wid
-            }).execute()
+            if wid in valid_ids:
+                supabase.table("holiday_wishlists").insert({
+                    "holiday_id": holiday_id,
+                    "wishlist_id": wid
+                }).execute()
+            else:
+                print(f"Пропущен несуществующий/чужой wishlist_id: {wid}")
 
     return RedirectResponse("/calendar", status_code=303)
 
@@ -243,29 +289,6 @@ async def my_wishlists(request: Request):
         "wishlists": result.data or [],
         "user_email": user.email
     })
-
-@app.get("/calendar/events/{year}/{month}")
-async def get_calendar_events(year: int, month: int, request: Request):
-    user = get_current_user(request)
-    if not user:
-        return {}
-
-    start = date(year, month, 1)
-    end = start + relativedelta(months=1) - relativedelta(days=1)
-
-    res = supabase.table("holidays")\
-        .select("date, holiday_wishlists(count)")\
-        .eq("user_id", user.id)\
-        .gte("date", start.isoformat())\
-        .lte("date", end.isoformat())\
-        .execute()
-
-    counts = {}
-    for h in res.data or []:
-        day = h["date"].split('-')[2].lstrip('0')  # день без ведущих нулей
-        counts[day] = h["holiday_wishlists"][0]["count"]
-
-    return counts
 
 
 @app.post("/wishlist/create")
@@ -380,7 +403,7 @@ async def add_item(
     return RedirectResponse(f"/wishlist/{wishlist_id}", status_code=303)
 
 
-# ── Предложить предмет в вишлист ─────────────────────────────────────────
+# ── Предложить предмет ────────────────────────────────────────────────────
 @app.get("/wishlist/{wishlist_id}/suggest", response_class=HTMLResponse)
 async def suggest_form(request: Request, wishlist_id: str):
     user = get_current_user(request)

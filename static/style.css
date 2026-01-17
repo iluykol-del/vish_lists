@@ -1,4 +1,5 @@
-/* Общие стили */
+/* Современный, бледно-синий, минималистичный и приятный дизайн */
+
 * {
   margin: 0;
   padding: 0;
@@ -6,25 +7,62 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f9fafb;
-  color: #111827;
-  line-height: 1.5;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f0f7ff; /* очень светлый бледно-синий фон */
+  color: #1e293b;
+  line-height: 1.6;
+  min-height: 100vh;
 }
 
+/* Контейнеры */
 .container {
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
 }
 
+.main-layout {
+  display: flex;
+  gap: 2.5rem;
+  padding: 3rem 0;
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Контент */
+.content {
+  flex: 1;
+  max-width: 960px;
+}
+
+/* Боковая панель (календарь) — лёгкая и воздушная */
+.sidebar {
+  width: 360px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 24px;
+  padding: 2rem;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(191, 219, 254, 0.4);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.08);
+  height: fit-content;
+  position: sticky;
+  top: 120px;
+}
+
+/* Хедер — чистый и строгий */
 header {
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 1rem 0;
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(191, 219, 254, 0.4);
+  padding: 1.25rem 0;
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(16px);
 }
 
 .header-content {
@@ -34,220 +72,124 @@ header {
 }
 
 header h1 {
-  font-size: 1.6rem;
-  font-weight: 600;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e40af;
+  letter-spacing: -0.02em;
 }
 
-.logout {
-  color: #6b7280;
+nav a {
+  color: #64748b;
   text-decoration: none;
   font-weight: 500;
+  margin-left: 2rem;
+  transition: color 0.25s;
 }
 
-.logout:hover {
-  color: #374151;
+nav a:hover {
+  color: #1e40af;
 }
 
-/* Карточки */
+/* Карточки — лёгкие, с бледно-синим акцентом */
 .card {
   background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid rgba(191, 219, 254, 0.5);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
 }
 
 .card:hover {
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  border-color: #93c5fd;
+  box-shadow: 0 16px 40px rgba(59, 130, 246, 0.08);
 }
 
-/* Формы */
+/* Формы — современные и приятные */
 input, textarea, select {
   width: 100%;
-  padding: 0.85rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
   font-size: 1rem;
-  margin-bottom: 1.2rem;
-  transition: border-color 0.2s;
+  background: #f0f7ff;
+  transition: all 0.25s;
+  margin-bottom: 1.5rem;
 }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-textarea {
-  min-height: 100px;
-  resize: vertical;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  background: white;
 }
 
 button {
-  padding: 0.85rem 1.5rem;
-  background: #3b82f6;
+  padding: 1rem 2rem;
+  background: #1e40af;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: 500;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.05rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
 }
 
 button:hover {
-  background: #2563eb;
-}
-
-button:active {
-  transform: translateY(1px);
-}
-
-/* Шаринг */
-.share-btn {
-  padding: 0.7rem 1.4rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: #6b7280;
-  color: white;
-}
-
-.share-btn.shared {
-  background: #10b981;
-}
-
-.share-btn:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
+  background: #1e3a8a;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(30, 64, 175, 0.25);
 }
 
 /* Сетка списков */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 2rem;
 }
 
-/* Ошибки/сообщения */
-.error, .success-message {
-  padding: 0.9rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-}
-
-.error {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-}
-
-.success-message {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-}
-
-/* Календарь в боковой панели */
-.sidebar {
-  flex: 1;
-  min-width: 340px;
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  height: fit-content;
-  position: sticky;
-  top: 100px;
-}
-
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.2rem;
-}
-
+/* Календарь — строгий, но с бледно-синими акцентами */
 .calendar-header h3 {
-  margin: 0;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.calendar-header button {
-  background: none;
-  border: none;
-  font-size: 1.6rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  color: #4b5563;
-  transition: color 0.2s;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
 }
 
 .calendar-header button:hover {
-  color: #111827;
-}
-
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  text-align: center;
-}
-
-.day-name {
-  font-weight: 600;
-  color: #6b7280;
-  padding: 0.6rem 0;
-  font-size: 0.9rem;
-}
-
-.calendar-day {
-  padding: 0.9rem 0;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.95rem;
-  position: relative;
-  background: transparent;
+  color: #1e40af;
 }
 
 .calendar-day:hover {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: rgba(191, 219, 254, 0.3);
+  color: #1e40af;
 }
 
 .calendar-day.today {
-  background: #3b82f6;
+  background: #1e40af;
   color: white;
-  font-weight: bold;
 }
 
 .calendar-day.has-events {
+  background: rgba(191, 219, 254, 0.4);
   font-weight: 600;
-  background: rgba(254, 243, 199, 0.5);
 }
 
 .event-dots {
   position: absolute;
-  bottom: 6px;
+  bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 4px;
+  gap: 5px;
 }
 
 .event-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-}
-
-.calendar-day.empty {
-  background: transparent;
-  cursor: default;
-  color: #d1d5db;
+  background: #93c5fd; /* бледно-синий */
+  box-shadow: 0 2px 6px rgba(147, 197, 253, 0.4);
 }
