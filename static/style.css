@@ -118,6 +118,33 @@ input, textarea, select {
   margin-bottom: 1.5rem;
 }
 
+/* Small square checkbox for wishlist items */
+.wl-checkbox {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.8rem;
+  height: 0.8rem;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 4px;
+  background-clip: padding-box;
+  background-color: white;
+  cursor: pointer;
+}
+
+.wl-checkbox:checked {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 11-1.06-1.06L12.72 4.22a.75.75 0 011.06 0z'/%3E%3Cpath fill='white' d='M4.22 9.22L1.5 6.5a.75.75 0 00-1.06 1.06l3.25 3.25a.75.75 0 001.06 0l6-6a.75.75 0 10-1.06-1.06L4.22 9.22z'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100%;
+}
+
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: #3b82f6;
@@ -261,3 +288,45 @@ textarea {
 }
 
 /* Конец стилей для login.html */
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  animation: slideDown 0.3s ease-out;
+}
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+}
+.modal-close:hover {
+  color: #000;
+}
